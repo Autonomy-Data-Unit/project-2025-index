@@ -1,0 +1,8 @@
+fasthtml-hf
+python-fasthtml
+starlette
+lancedb
+pandas
+numpy
+python-dotenv
+sentence-transformers
