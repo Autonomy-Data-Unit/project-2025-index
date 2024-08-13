@@ -228,6 +228,43 @@ css = Style('''
     .non-wikipedia-link {
         color: var(--secondary-text-color);
     }
+    .alphanav-container {
+        text-align: center;
+    }
+
+    .alphanav-container a {
+        display: inline-block;
+        margin: 0 5px;
+        text-decoration: none;
+    }
+
+    .alphanav-container a:hover {
+        text-decoration: underline;
+    }
+
+    .alphanav-container span {
+        display: inline-block;
+        width: 5px;  /* Adjust this width as needed */
+    }
+
+    .page-links-container {
+        text-align: left; /* Align to left, or center if you prefer */
+    }
+
+    .page-links-container a {
+        display: inline-block;
+        margin: 0 5px;
+        text-decoration: none;
+    }
+
+    .page-links-container a:hover {
+        text-decoration: underline;
+    }
+
+    .page-links-container span {
+        display: inline-block;
+        width: 5px;  /* Adjust the spacing as necessary */
+    }
 
 ''')
 
@@ -370,7 +407,7 @@ def home():
                     P(f"""This project was developed by the""",
                     A('Autonomy Institute', href=f'https://autonomy.work/', target="_blank"),f"""
                     501(c)(3) and is maintained on""",
-                    A('Github', href=f'https://github.com/', target="_blank"),
+                    A('Github', href=f'https://github.com/Autonomy-Data-Unit/project-2025-index', target="_blank"),
                     f"""where contributions are welcome.
                     """),
                     style="margin-bottom: 10px; line-height: 1.5;"),
@@ -424,12 +461,13 @@ def render_index_links():
         return Div(
             Hr(),
             H3(*(
-                (A(f"{letter if letter != 'num' else '#'}", id=f"{letter}", hx_post=f"/letter_sort?letter={letter}" if letter != "num" else f"/letter_sort?letter=num", hx_target="#index-data", hx_swap="innerHTML", hx_swap_oob='true'), Span(" ", style="display:inline-block; width:10px;"))
-                            for letter in [item for item in string.ascii_uppercase]+['num']
-                        )),
+                (A(f"{letter if letter != 'num' else '#'}", id=f"{letter}", hx_post=f"/letter_sort?letter={letter}" if letter != "num" else f"/letter_sort?letter=num", hx_target="#index-data", hx_swap="innerHTML", hx_swap_oob='true'),
+                 Span("", style="display:inline-block; width:5px;"))
+                for letter in [item for item in string.ascii_uppercase] + ['num']
+            ), _class="alphanav-container"),
             Hr(),
             id="alphanav",
-            name="alphanavigator",hx_swap="innerHTML", hx_swap_oob='true'
+            name="alphanavigator", hx_swap="innerHTML", hx_swap_oob='true'
         )
     elif pagenav:
         return Div(
@@ -444,8 +482,6 @@ def render_index_links():
         )
     else:
         return Div(Hr(),id="alphanav",name="alphanavigator",hx_swap="innerHTML", hx_swap_oob='true')
-
-
 
 # section_page_dict
 
@@ -472,7 +508,6 @@ def create_page_links(pages: list, summaries: list):
     For a single entity, converts a list of page numbers and list of summary strings
     into a list of page links (of type list)
     """
-    # print("called create_page_links")
 
     # Create a dictionary mapping unique pages to their corresponding summaries
     page_summary_map = {page: summaries[i] for i, page in enumerate(pages)}
@@ -491,7 +526,9 @@ def create_page_links(pages: list, summaries: list):
     ]
 
     # Add commas between links, except after the last one
-    return [element for link in links for element in (link, Span(", "))][:-1]
+    return [
+        element for link in links for element in (link, Span(", ", _class="page-links-container"))
+    ][:-1]
 
 def create_letter_space(title, current_page=None):
     # print("called create_letter_space")
@@ -598,8 +635,8 @@ def reset_search():
             style="margin-left: 5px;"
             ),
             Select(
-                Option("Index Item", value="title_vector", selected=search_by == "title_vector"),
-                Option("Page Text", value="summary_vector", selected=search_by == "summary_vector"),
+                Option("Title", value="title_vector", selected=search_by == "title_vector"),
+                Option("Context", value="summary_vector", selected=search_by == "summary_vector"),
                 name="search_type",
                 id="search_type_form",
                 hx_swap_oob='true'
