@@ -319,7 +319,7 @@ def alphabetical_sort_table(table):
     return table.sort_values(by='title', key=lambda col: col.map(custom_sort_key))
 
 # load data
-db = lancedb.connect("./.lancedb")
+db = lancedb.connect("data/.lancedb")
 table = db.open_table("entities")
 
 # run first search
