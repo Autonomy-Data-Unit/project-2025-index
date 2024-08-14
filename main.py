@@ -315,7 +315,6 @@ def group_by_page(df):
     Additionally, merges the result with 'title_index' and 'instance_of' columns from
     the original DataFrame.
     """
-    print("called group_by_page")
     # Efficiently convert 'instance_of' column to tuples if needed
     if isinstance(df['instance_of'].iloc[0], (list, np.ndarray)):
         df['instance_of'] = df['instance_of'].apply(tuple)
@@ -338,7 +337,6 @@ def custom_sort_key(title):
         return (0, title.lower())  # Letters come first
 
 def alphabetical_limit(df, letter):
-    print("called alphabetical_limit")
     if letter == "num":
         # Filter the DataFrame to only include titles that start with a number
         filtered_table = df[df['title'].str.match(r'^\d')]
@@ -392,6 +390,7 @@ async def serve_image(fname: str, ext: str):
 
 @app.get("/")
 def home(session):
+    print("New session generating")
     # initial state
     session['search_by'] = "title_vector"
     session['sort_by'] = "alphabetical"
