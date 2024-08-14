@@ -236,9 +236,9 @@ css = Style('''
     }
 
     .wikipedia-link {
-        color: var(--link-color);
-        text-decoration: none;
-    }
+    color: var(--link-color, inherit) !important;
+    text-decoration: none !important;
+}
 
     .non-wikipedia-link {
         color: var(--secondary-text-color);
@@ -359,7 +359,8 @@ def df_to_html(df, include_spacing):
                     f"{row['title']}",
                     href=row['wikipedia_url'],
                     target="_blank",
-                    _class="wikipedia-link"
+                    _class="wikipedia-link", 
+                    style="color: var(--link-color, inherit) !important; text-decoration: none"
                 ) if row['wikipedia_url'] else Span(f"{row['title']}", _class="non-wikipedia-link"),
                 Span(" ", style="display:inline-block; width:5px;"),
                 *create_page_links(row['page'], row['summary'])
