@@ -661,5 +661,4 @@ def filter_table(filter_type: str):
     return df_to_html(new_table, False), reset_sort(), reset_search_input(), reset_search_type(), remove_nav()
 
 
-# setup_hf_backup(app)
-# serve()
+serve()
