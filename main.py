@@ -149,44 +149,56 @@ filter_entities = [
 
 css = Style('''
 
-    html {prefers-color-scheme: light; --pico-prefers-color-scheme: light;}
-    :root { --pico-font-size: 90%; --pico-font-family: IBM Plex Serif, serif;}
+    html {
+        prefers-color-scheme: light;
+        --pico-prefers-color-scheme: light;
+    }
+
+    :root {
+        --pico-font-size: 90%;
+        --pico-font-family: IBM Plex Serif, serif;
+    }
 
     body {
         background-color: var(--primary-bg-color);
         color: var(--primary-text-color);
     }
 
-    ul li { list-style: none; padding: 0; }
-    ul { padding: 0; }
+    ul li {
+        list-style: none;
+        padding: 0;
+    }
+
+    ul {
+        padding: 0;
+    }
 
     H1 {
         text-align: center;
         color: var(--primary-text-color);
         margin-bottom: 30px;
-
     }
 
     Img {
-    display: block;
-    margin: 0 auto;
-    max-width: 50%;
-    height: auto;
+        display: block;
+        margin: 0 auto;
+        max-width: 50%;
+        height: auto;
     }
 
     Form {
-    margin-bottom: 10px;
+        margin-bottom: 10px;
     }
 
     Figure {
-    margin-bottom: 30px;
+        margin-bottom: 30px;
     }
 
     Figcaption {
-    text-align: center;
-    font-size: 0.80rem;
-    color: #888;
-    margin-top: 5px;
+        text-align: center;
+        font-size: 0.80rem;
+        color: #888;
+        margin-top: 5px;
     }
 
     .tooltip {
@@ -236,9 +248,9 @@ css = Style('''
     }
 
     .wikipedia-link {
-    color: var(--link-color, inherit) !important;
-    text-decoration: none !important;
-}
+        color: var(--link-color, inherit) !important;
+        text-decoration: none !important;
+    }
 
     .non-wikipedia-link {
         color: var(--secondary-text-color);
@@ -267,9 +279,9 @@ css = Style('''
     }
 
     .unit {
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 10px;
     }
 
     .page-links-container a {
@@ -288,22 +300,22 @@ css = Style('''
     }
 
     .search_form {
-    display: flex;
-    width: 100%;
+        display: flex;
+        width: 100%;
     }
 
     .search_type {
-    width: 50%;
-    display: inline-block;
-    vertical-align: top;
-    margin-left: 10px
+        width: 50%;
+        display: inline-block;
+        vertical-align: top;
+        margin-left: 10px
     }
 
     .search {
-    width: 50%;
-    display: inline-block;
-    vertical-align: top;
-    margin-right: 5px;
+        width: 50%;
+        display: inline-block;
+        vertical-align: top;
+        margin-right: 5px;
     }
 ''')
 
@@ -315,42 +327,42 @@ def group_by_page(df):
     Additionally, merges the result with 'title_index' and 'instance_of' columns from
     the original DataFrame.
     """
-    # Efficiently convert 'instance_of' column to tuples if needed
     if isinstance(df['instance_of'].iloc[0], (list, np.ndarray)):
         df['instance_of'] = df['instance_of'].apply(tuple)
-    # Group by 'title' while aggregating 'page' and 'summary' into lists
     aggregated_data = df.groupby('title', as_index=False).agg({
         'page': list,
         'summary': list
     })
-    # Extract relevant columns for merging, ensuring no duplicates
     merge_columns = df[['title', 'title_index', 'instance_of', 'wikipedia_url']].drop_duplicates()
-    # Merge the grouped data with the additional columns from the original DataFrame
     result = pd.merge(aggregated_data, merge_columns, on='title', how='left')
     return result
 
 def custom_sort_key(title):
-    # Check if the first character is a digit
     if title[0].isdigit():
         return (1, title.lower())  # Numbers come after letters
     else:
         return (0, title.lower())  # Letters come first
 
 def alphabetical_limit(df, letter):
+    """
+    Filters dataframe by titles beginning with a letter from the alphabet or number.
+    """
     if letter == "num":
-        # Filter the DataFrame to only include titles that start with a number
         filtered_table = df[df['title'].str.match(r'^\d')]
     else:
-        # Filter the DataFrame to only include titles that start with the specified letter
         filtered_table = df[df['title'].str.lower().str.startswith(letter.lower())]
     return filtered_table.sort_values(by='title', key=lambda col: col.map(custom_sort_key))
 
 def alphabetical_sort_table(df):
+    """
+    Sorts dataframe rows by title in alphabetical order.
+    """
     return df.sort_values(by='title', key=lambda col: col.map(custom_sort_key))
 
 def df_to_html(df, include_spacing):
-    previous_page = None
-
+    """
+    Generate HTML section for dataframe of index items.
+    """
     return Ul(*[
         Div(
             Br() if include_spacing and previous_page is not None and row['page'] != previous_page else None,
@@ -359,7 +371,7 @@ def df_to_html(df, include_spacing):
                     f"{row['title']}",
                     href=row['wikipedia_url'],
                     target="_blank",
-                    _class="wikipedia-link", 
+                    _class="wikipedia-link",
                     style="color: var(--link-color, inherit) !important; text-decoration: none"
                 ) if row['wikipedia_url'] else Span(f"{row['title']}", _class="non-wikipedia-link"),
                 Span(" ", style="display:inline-block; width:5px;"),
@@ -369,20 +381,17 @@ def df_to_html(df, include_spacing):
         for previous_page, (_, row) in zip([None] + df['page'].tolist(), df.iterrows())
     ])
 
-# connect to lancedb and download table
+# Connect to LanceDB and load data
 db = lancedb.connect(".lancedb")
 table = db.open_table("entities")
-# run first search
 table.search('test', vector_column_name="title_vector")
 lancepd = table.to_pandas()
 grouped_lancepd = group_by_page(lancepd)
 index_table = alphabetical_limit(grouped_lancepd, 'a')
 
-# build section map:
+# Map pages to sections in the document:
 section_pages = lancepd.groupby('section')['page'].agg(['min', 'max']).reset_index()
-# Sort by the 'min' column to order by the first page encountered
 section_pages = section_pages.sort_values('min')
-# Convert to ordered dictionary
 section_page_dict = section_pages.set_index('section').T.to_dict()
 
 @app.get("/assets/{fname:path}.{ext:static}")
@@ -390,17 +399,11 @@ async def serve_image(fname: str, ext: str):
     return FileResponse(f'assets/{fname}.{ext}')
 
 @app.get("/")
-def home(session):
+def home():
+    """
+    Load entire index page for first time.
+    """
     print("New session generating")
-    # initial state
-    session['search_by'] = "title_vector"
-    session['sort_by'] = "alphabetical"
-    session['previous_initial'] = None
-    session['filter_by'] = "none"
-    session['search_mode'] = False
-    session['previous_page'] = None
-    session['alphanav'] = True
-    session['pagenav'] = False
     return Title("Project 2025 Index"), Main(
             Div(
                 H1('Project 2025 Index'),
@@ -433,10 +436,10 @@ def home(session):
                         ),
                     ),
                     Select(
-                        Option("None", value="none", selected=session['sort_by']=="none"),
-                        Option("Alphabetical", value="alphabetical", selected=session['sort_by'] == "alphabetical"),
-                        Option("Page Number", value="page", selected=session['sort_by'] == "page"),
-                        Option("Vector", value="vector", selected=session['sort_by'] == "vector"),
+                        Option("None", value="none", selected=False),
+                        Option("Alphabetical", value="alphabetical", selected=True),
+                        Option("Page Number", value="page", selected=False),
+                        Option("Vector", value="vector", selected=False),
                         name="sort_type",
                         id="sort_form",
                         hx_post="/sort", hx_target="#index-data", hx_swap="innerHTML", hx_swap_oob='true'
@@ -450,13 +453,12 @@ def home(session):
                         ),
                     ),
                     Select(
-                        Option("None", value="None", selected=session['filter_by']=="none"), *[Option(entity, value=entity, selected=session['filter_by']==entity) for entity in filter_entities],
+                        Option("None", value="None", selected=True), *[Option(entity, value=entity, selected=False) for entity in filter_entities],
                         name="filter_type",
                         id="filter_form",
                         hx_post="/filter", hx_target="#index-data", hx_swap="innerHTML", hx_swap_oob='true'
                     ),
                 ),
-                # Div(
                 Form(
                     Div(
                         Div(Span("Search"),  # Add text next to the search input
@@ -472,8 +474,8 @@ def home(session):
                         ),
                         ),
                         Select(
-                            Option("Title", value="title_vector", selected=session['search_by'] == "title_vector"),
-                            Option("Context", value="summary_vector", selected=session['search_by'] == "summary_vector"),
+                            Option("Title", value="title_vector", selected=True),
+                            Option("Context", value="summary_vector", selected=False),
                             name="search_type",
                             id="search_type_form",
                             hx_swap_oob='true'
@@ -506,22 +508,34 @@ def home(session):
     )
 
 def reset_search_input():
-    return Input(placeholder="Search the document", type= "search",name="query", id="searchbar", hx_swap_oob='true'),
+    """
+    Rearch search bar input to placeholder.
+    """
+    return Input(placeholder="Search the document", type= "search",name="query", id="searchbar", hx_swap_oob='true')
 
 def reset_search_type():
+    """
+    Rearch search type selector form.
+    """
     return Select(
         Option("Title", value="title_vector", selected="title_vector"),
         Option("Context", value="summary_vector"),
         name="search_type",
         id="search_type_form",
         hx_swap_oob='true'
-    ),
+    )
 
 def remove_nav():
+    """
+    Remove the index navigator from above the index items.
+    """
     return Div(Hr(),id="indexnav",name="indexnavigator",hx_swap="innerHTML", hx_swap_oob='true')
 
 @app.post("/sort")
-def sort_table(session, sort_type:str):
+def sort_table(sort_type:str):
+    """
+    Sort and render the index. Also updates other components.
+    """
     if sort_type == 'alphabetical' or sort_type == 'none':
         new_table = alphabetical_limit(grouped_lancepd, 'a')
         table_html = df_to_html(new_table, False)
@@ -539,8 +553,10 @@ def sort_table(session, sort_type:str):
         table_html = df_to_html(new_table, False)
         return table_html, remove_nav(), reset_search_input(), reset_search_type(), reset_filter()
 
-
 def render_alphanav():
+    """
+    Render the index navigator for filtering items by letter of the alphabet.
+    """
     return Div(
         Hr(),
         H3(*(
@@ -554,6 +570,9 @@ def render_alphanav():
     )
 
 def render_pagenav():
+    """
+    Render the index navigator for filtering items by page range.
+    """
     return Div(
         Hr(),
         P(*(
@@ -570,11 +589,8 @@ def create_page_links(pages: list, summaries: list):
     For a single entity, converts a list of page numbers and list of summary strings
     into a list of page links (of type list)
     """
-    # Create a dictionary mapping unique pages to their corresponding summaries
     page_summary_map = {page: summaries[i] for i, page in enumerate(pages)}
-    # Sort the pages
     sorted_pages = sorted(page_summary_map.keys())
-    # Create the list of links with tooltips
     links = [
         Div(
             A(str(page), href=f'https://www.documentcloud.org/documents/24088042-project-2025s-mandate-for-leadership-the-conservative-promise#document/p{page+32}', target="_blank"),
@@ -583,15 +599,20 @@ def create_page_links(pages: list, summaries: list):
         )
         for page in sorted_pages
     ]
-    # Add commas between links, except after the last one
     return [
         element for link in links for element in (link, Span(", ", _class="page-links-container"))
     ][:-1]
 
 def refresh_table():
+    """
+    Reload initial index table.
+    """
     return df_to_html(index_table, False)
 
 def reset_sort():
+    """
+    Reset the sort form elements to initial state.
+    """
     return Select(
         Option("None", value="none", selected=True),
         Option("Alphabetical", value="alphabetical"),
@@ -603,6 +624,9 @@ def reset_sort():
     )
 
 def reset_filter():
+    """
+    Reset the filter form element to initial state.
+    """
     return Select(
         Option("None", value="None", selected=True), *[Option(entity, value=entity) for entity in filter_entities],
         name="filter_type",
@@ -612,12 +636,18 @@ def reset_filter():
 
 @app.post("/letter_sort")
 async def print_letter(request: Request, letter: str = None):
+    """
+    Get index items by letter of the alphabet.
+    """
     letter = letter or request.query_params.get('letter')
     new_table = alphabetical_limit(grouped_lancepd, str(letter))
     return df_to_html(new_table, False)
 
 @app.post("/page_sort")
 async def print_page(request: Request, page: str= None):
+    """
+    Get index items by page range from the document.
+    """
     page_range = page or request.query_params.get('page')
     p_min, p_max = page_range.split('-')[0],page_range.split('-')[1]
     data = lancepd
@@ -629,6 +659,9 @@ async def print_page(request: Request, page: str= None):
 
 @app.post("/search")
 def vector_search(query:str, search_type:str):
+    """
+    Search LanceDB by string.
+    """
     if not query:
         return render_alphanav(), refresh_table()
     if search_type == "title_vector":
@@ -654,12 +687,13 @@ def vector_search(query:str, search_type:str):
 
 @app.post("/filter")
 def filter_table(filter_type: str):
+    """
+    Filter table by Wikidata instance_of item.
+    """
     if filter_type == "None":
         new_table = alphabetical_sort_table(grouped_lancepd)
     else:
-        # Filter the DataFrame based on the selected filter_type
         new_table = alphabetical_sort_table(grouped_lancepd)[alphabetical_sort_table(grouped_lancepd)['instance_of'].apply(lambda x: filter_type in x)]
     return df_to_html(new_table, False), reset_sort(), reset_search_input(), reset_search_type(), remove_nav()
-
 
 serve()
