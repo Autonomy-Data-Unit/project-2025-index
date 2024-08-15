@@ -679,6 +679,7 @@ def vector_search(query:str, search_type:str):
     """
     if not query:
         return render_alphanav(), refresh_table()
+    print(f"Searching: {query}")
     if search_type == "title_vector":
         vector_column_name="title_vector"
     elif search_type == "summary_vector":
