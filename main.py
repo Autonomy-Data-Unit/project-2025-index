@@ -21,6 +21,8 @@ headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family
     Link(rel="stylesheet", href="assets/site.webmanifest"),
     Link(rel="stylesheet", href="assets/favicon.ico"))
 
+meta = Meta(property="og:image", content="/assets/badge.jpg")
+
 filter_entities = [
     "human",
     "Act of Congress in the United States",
@@ -324,7 +326,7 @@ css = Style('''
     }
 ''')
 
-app = FastHTML(hdrs=(picolink, css, headers))
+app = FastHTML(hdrs=(picolink, css, headers, meta))
 
 def group_by_page(df):
     """
