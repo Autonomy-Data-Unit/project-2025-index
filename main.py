@@ -14,7 +14,12 @@ from dotenv import load_dotenv
 import os
 from starlette.responses import FileResponse
 
-headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap"))
+headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap"),
+    Link(rel="stylesheet", href="assets/apple-touch-icon.png"),
+    Link(rel="stylesheet", href="assets/favicon-32x32.png"),
+    Link(rel="stylesheet", href="assets/favicon-16x16.png"),
+    Link(rel="stylesheet", href="assets/site.webmanifest"),
+    Link(rel="stylesheet", href="assets/favicon.ico"))
 
 filter_entities = [
     "human",
@@ -394,9 +399,13 @@ section_pages = lancepd.groupby('section')['page'].agg(['min', 'max']).reset_ind
 section_pages = section_pages.sort_values('min')
 section_page_dict = section_pages.set_index('section').T.to_dict()
 
-@app.get("/assets/{fname:path}.{ext:static}")
-async def serve_image(fname: str, ext: str):
-    return FileResponse(f'assets/{fname}.{ext}')
+@app.get("/assets/{fname:path}")
+async def serve_file(fname: str):
+    return FileResponse(f'assets/{fname}')
+
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse("assets/favicon.ico")
 
 @app.get("/")
 def home():
