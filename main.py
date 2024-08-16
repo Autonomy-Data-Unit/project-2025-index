@@ -13,6 +13,7 @@ import string
 from dotenv import load_dotenv
 import os
 from starlette.responses import FileResponse
+import uuid
 
 headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap"),
     Link(rel="stylesheet", href="assets/apple-touch-icon.png"),
@@ -414,11 +415,15 @@ async def favicon():
     return FileResponse("assets/favicon.ico")
 
 @app.get("/")
-def home():
+def home(session):
     """
     Load entire index page for first time.
     """
-    print("New session generating")
+    if 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4())
+        print(f"[INFO] New session created: {session['session_id']}")
+    else:
+        print(f"[INFO] Existing session resumed: {session['session_id']}")
     return Title("Project 2025 Index"), Main(
             Div(
                 H1('Project 2025 Index'),
