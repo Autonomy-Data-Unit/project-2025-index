@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 import os
 from starlette.responses import FileResponse
 import uuid
+import time
 
 headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;700&display=swap"),
     Link(rel="stylesheet", href="assets/apple-touch-icon.png"),
@@ -22,6 +23,7 @@ headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family
     Link(rel="stylesheet", href="assets/site.webmanifest"),
     Link(rel="stylesheet", href="assets/favicon.ico"))
 
+# define metadata for HTML doc like title/image for search engines/links
 meta = (Meta(property="og:title", content="Project 2025 Index"),
     Meta(property="og:image", content="/assets/badge.jpg"),
     Meta(property="og:description", content="The missing index for the Heritage Foundation's Project 2025."),
@@ -331,8 +333,10 @@ css = Style('''
     }
 ''')
 
+# initiate application:
 app = FastHTML(hdrs=(picolink, css, headers, meta))
 
+# define several functions for loading and pre-processing data:
 def group_by_page(df):
     """
     Groups the DataFrame by 'title' and aggregates 'page' and 'summary' into lists.
@@ -350,6 +354,10 @@ def group_by_page(df):
     return result
 
 def custom_sort_key(title):
+    """
+    Simple function that distinguishes between items that begin with an alphabetical value and
+    a number.
+    """
     if title[0].isdigit():
         return (1, title.lower())  # Numbers come after letters
     else:
@@ -393,6 +401,7 @@ def df_to_html(df, include_spacing):
         for previous_page, (_, row) in zip([None] + df['page'].tolist(), df.iterrows())
     ])
 
+
 # Connect to LanceDB and load data
 db = lancedb.connect(".lancedb")
 table = db.open_table("entities")
@@ -406,6 +415,7 @@ section_pages = lancepd.groupby('section')['page'].agg(['min', 'max']).reset_ind
 section_pages = section_pages.sort_values('min')
 section_page_dict = section_pages.set_index('section').T.to_dict()
 
+# Define routes for page load:
 @app.get("/assets/{fname:path}")
 async def serve_file(fname: str):
     return FileResponse(f'assets/{fname}')
@@ -527,6 +537,7 @@ def home(session):
             cls="container"
     )
 
+# define functions for resetting components:
 def reset_search_input():
     """
     Rearch search bar input to placeholder.
@@ -551,6 +562,7 @@ def remove_nav():
     """
     return Div(Hr(),id="indexnav",name="indexnavigator",hx_swap="innerHTML", hx_swap_oob='true')
 
+# define routes for user interaction:
 @app.post("/sort")
 def sort_table(sort_type:str):
     """
@@ -613,7 +625,7 @@ def create_page_links(pages: list, summaries: list):
     sorted_pages = sorted(page_summary_map.keys())
     links = [
         Div(
-            A(str(page), href=f'https://www.documentcloud.org/documents/24088042-project-2025s-mandate-for-leadership-the-conservative-promise#document/p{page+32}', target="_blank"),
+            A(str(page), href=f'https://autonomy.work/wp-content/uploads/2025/01/project2025.pdf#page={page+33}', target="_blank"),
             Div(page_summary_map[page], cls="tooltiptext"),
             cls="tooltip"
         )
