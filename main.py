@@ -625,7 +625,7 @@ def create_page_links(pages: list, summaries: list):
     sorted_pages = sorted(page_summary_map.keys())
     links = [
         Div(
-            A(str(page), href=f'https://autonomy.work/wp-content/uploads/2025/01/project2025.pdf#page={page+33}', target="_blank"),
+            A(str(page), href=f'https://adu-p25.s3.us-east-1.amazonaws.com/project2025.pdf#page={page+33}', target="_blank"),
             Div(page_summary_map[page], cls="tooltiptext"),
             cls="tooltip"
         )
