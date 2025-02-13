@@ -1,8 +1,8 @@
-fasthtml-hf
-python-fasthtml
-starlette
-lancedb
-pandas
-numpy
-python-dotenv
-sentence-transformers
+fasthtml-hf==0.1.4
+python-fasthtml==0.2.4
+starlette==0.38.2
+lancedb==0.10.0
+pandas==2.2.2
+numpy==1.26.4
+python-dotenv==1.0.1
+sentence-transformers==3.0.1
