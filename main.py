@@ -444,16 +444,16 @@ def home(session):
                                 A('DonkeyHotey', href='https://www.flickr.com/photos/donkeyhotey/53792367625', target="_blank"),
                             ),
                         ),
-                Div(P(A('Project 2025', href=f'https://www.project2025.org/', target="_blank"), f"""is a controversial plan developed by the Heritage Foundation think-tank that
+                Div(P(A('Project 2025', href=f'https://www.project2025.org/', target="_blank"), f""" is a controversial plan developed by the Heritage Foundation think-tank that
                     outlines a policy framework for a future conservative US president.
                     The 900-page publication lacks an index, so we created one to provide researchers with another approach to navigating the contents of the document."""),
                     P("""The index includes some useful filters and summaries to aid researchers in exploring the large number of items within Project 2025. Hover over each page number to view a summary of how the item is discussed on the page, and click the page link to view the source document.
                     Explore specific groups of items by sorting, filtering and searching the index via the interactive forms. More information on each form can be accessed by hovering over the ⓘ symbols."""),
-                    P(f"""This project was developed by the""",
+                    P(f"""This project was developed by the """,
                     A('Autonomy Institute', href=f'https://autonomy.work/', target="_blank"),f"""
-                    501(c)(3) and is maintained on""",
+                    501(c)(3) and is maintained on """,
                     A('Github', href=f'https://github.com/Autonomy-Data-Unit/project-2025-index', target="_blank"),
-                    f"""where contributions are welcome.
+                    f""" where contributions are welcome.
                     """),),
                 cls = "unit"
             ),
