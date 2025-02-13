@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.10.14
 WORKDIR /code
 COPY --link --chown=1000 . .
 RUN mkdir -p /tmp/cache/
