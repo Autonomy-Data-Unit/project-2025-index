@@ -27,7 +27,7 @@ headers = (Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family
 meta = (Meta(property="og:title", content="Project 2025 Index"),
     Meta(property="og:image", content="/assets/badge.jpg"),
     Meta(property="og:description", content="The missing index for the Heritage Foundation's Project 2025."),
-    Meta(property="og:url", content="https://www.project2025index.com/"),
+    Meta(property="og:url", content="https://project2025index.com/"),
 )
 
 filter_entities = [
