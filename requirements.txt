@@ -1,5 +1,12 @@
 fasthtml-hf==0.1.4
 python-fasthtml==0.8
+# Pin fasthtml's transitive deps to the versions contemporaneous with fasthtml 0.8.
+# A clean rebuild otherwise resolves newer fastlite/fastcore that no longer re-export
+# `Any`, which fasthtml 0.8's fastapp.py relies on -> `NameError: name 'Any' is not
+# defined` at import time. (Worked on the old Railway image only because it was built
+# when the older transitive versions were still current.)
+fastcore==1.7.29
+fastlite==0.0.13
 sqlite_minutils
 starlette==0.38.2
 lancedb==0.10.0

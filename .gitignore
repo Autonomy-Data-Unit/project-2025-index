@@ -29,7 +29,11 @@ MANIFEST
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
+# NOTE: the default "*.manifest" rule is intentionally disabled — it would exclude
+# the LanceDB index manifests (.lancedb/**/_versions/*.manifest, _latest.manifest)
+# from the AppGarden deploy, which filters uploads through .gitignore. Without those
+# the vector index cannot be opened at runtime. (This repo has no PyInstaller manifests.)
+# *.manifest
 *.spec
 
 # Installer logs

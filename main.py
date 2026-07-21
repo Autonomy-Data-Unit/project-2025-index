@@ -573,8 +573,10 @@ def sort_table(sort_type:str):
         table_html = df_to_html(new_table, False)
         return table_html,render_alphanav(), reset_search_input(), reset_search_type(), reset_filter()
     elif sort_type == 'page':
-        data = table.to_pandas()
-        data = data[(data['page'] >= 1) & (data['page'] <= 17)]
+        # Reuse the module-level dataframe (loaded once at startup from the
+        # LanceDB table) instead of re-deserialising the whole table from disk
+        # on every request. Copy so the list-wrapping below doesn't mutate it.
+        data = lancepd[(lancepd['page'] >= 1) & (lancepd['page'] <= 17)].copy()
         data['summary'] = data['summary'].apply(lambda x: [x])
         data['page'] = data['page'].apply(lambda x: [x])
         new_table = data
@@ -723,10 +725,13 @@ def filter_table(filter_type: str):
     """
     Filter table by Wikidata instance_of item.
     """
+    # Sort once, then filter — the previous code sorted the whole frame twice
+    # (and a third time in the None branch) on every request.
+    sorted_table = alphabetical_sort_table(grouped_lancepd)
     if filter_type == "None":
-        new_table = alphabetical_sort_table(grouped_lancepd)
+        new_table = sorted_table
     else:
-        new_table = alphabetical_sort_table(grouped_lancepd)[alphabetical_sort_table(grouped_lancepd)['instance_of'].apply(lambda x: filter_type in x)]
+        new_table = sorted_table[sorted_table['instance_of'].apply(lambda x: filter_type in x)]
     return df_to_html(new_table, False), reset_sort(), reset_search_input(), reset_search_type(), remove_nav()
 
 serve()
